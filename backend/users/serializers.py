@@ -7,7 +7,7 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
-    display_name = serializers.ReadOnlyField()
+    display_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -24,6 +24,9 @@ class UserSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.avatar.url)
             return obj.avatar.url
         return None
+
+    def get_display_name(self, obj):
+        return obj.nickname or obj.username
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
