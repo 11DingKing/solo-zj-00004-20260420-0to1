@@ -40,10 +40,32 @@ class ApiService {
 
         try {
             const response = await fetch(url, config);
-            const data = await response.json();
+
+            let data;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error(`服务器返回了非 JSON 响应 (HTTP ${response.status})，请检查 API 路径是否正确`);
+            }
 
             if (!response.ok) {
-                throw new Error(data.detail || data.error || `HTTP error! status: ${response.status}`);
+                if (typeof data === 'object' && (data.detail || data.error || data.non_field_errors || data.username || data.password)) {
+                    let errorMsg = data.detail || data.error;
+                    if (data.non_field_errors) {
+                        errorMsg = data.non_field_errors[0];
+                    }
+                    if (data.username) {
+                        errorMsg = '用户名: ' + data.username[0];
+                    }
+                    if (data.password) {
+                        errorMsg = '密码: ' + data.password[0];
+                    }
+                    throw new Error(errorMsg);
+                }
+                throw new Error(`请求失败 (HTTP ${response.status})`);
             }
 
             return data;
