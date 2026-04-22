@@ -7,6 +7,7 @@
 	import { renderMarkdown } from '$lib/utils/markdown';
 
 	let article = null;
+	let renderedContent = '';
 	let comments = [];
 	let loading = true;
 	let error = '';
@@ -24,6 +25,8 @@
 		try {
 			const articleId = $page.params.id;
 			article = await api.get(`/articles/${articleId}/view/`);
+
+			renderedContent = await renderMarkdown(article.content);
 
 			isAuthor = $auth.isAuthenticated && $auth.user?.id === article.author?.id;
 
@@ -149,7 +152,7 @@
 			</header>
 
 			<div class="article-content">
-				{@html renderMarkdown(article.content)}
+				{@html renderedContent}
 			</div>
 		</article>
 

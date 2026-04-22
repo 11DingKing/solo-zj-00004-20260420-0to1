@@ -8,12 +8,23 @@
 
 	let title = '';
 	let content = '';
+	let renderedPreview = '';
 	let selectedCategory = '';
 	let selectedTags = [];
 	let status = 'draft';
 	let coverFile = null;
 	let coverPreview = null;
 	let originalCoverUrl = null;
+
+	$: updatePreview(content);
+
+	async function updatePreview(newContent) {
+		if (newContent) {
+			renderedPreview = await renderMarkdown(newContent);
+		} else {
+			renderedPreview = '';
+		}
+	}
 
 	let categories = [];
 	let tags = [];
@@ -196,8 +207,8 @@
 					<div class="form-group">
 						<label>内容预览</label>
 						<div class="markdown-preview">
-							{#if content}
-								{@html renderMarkdown(content)}
+							{#if renderedPreview}
+								{@html renderedPreview}
 							{:else}
 								<p class="empty-preview">暂无内容可预览</p>
 							{/if}
