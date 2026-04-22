@@ -1,9 +1,10 @@
 import { writable } from 'svelte/store';
+import { browser } from '$app/environment';
 
 const createAuthStore = () => {
-    const user = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    const refreshToken = localStorage.getItem('refreshToken');
+    const user = browser ? localStorage.getItem('user') : null;
+    const token = browser ? localStorage.getItem('token') : null;
+    const refreshToken = browser ? localStorage.getItem('refreshToken') : null;
 
     const { subscribe, set, update } = writable({
         user: user ? JSON.parse(user) : null,
@@ -15,9 +16,11 @@ const createAuthStore = () => {
     return {
         subscribe,
         login: (data) => {
-            localStorage.setItem('user', JSON.stringify(data.user));
-            localStorage.setItem('token', data.access);
-            localStorage.setItem('refreshToken', data.refresh);
+            if (browser) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('token', data.access);
+                localStorage.setItem('refreshToken', data.refresh);
+            }
             set({
                 user: data.user,
                 token: data.access,
@@ -26,9 +29,11 @@ const createAuthStore = () => {
             });
         },
         logout: () => {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
+            if (browser) {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+            }
             set({
                 user: null,
                 token: null,
@@ -39,7 +44,7 @@ const createAuthStore = () => {
         updateUser: (userData) => {
             update(state => {
                 const newUser = { ...state.user, ...userData };
-                localStorage.setItem('user', JSON.stringify(newUser));
+                if (browser) localStorage.setItem('user', JSON.stringify(newUser));
                 return {
                     ...state,
                     user: newUser
